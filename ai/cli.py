@@ -43,7 +43,7 @@ def main():
 
         case "chat":
             from .chat_cli import start_chat
-            start_chat(args.config_path)
+            start_chat(args.config_path, args.model_id, args.instruction, args.message)
 
         case _:
             print(f"Command not found: '{args.command}'")
