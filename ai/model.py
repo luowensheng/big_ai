@@ -33,7 +33,7 @@ def install_requirements(requirement_path: str):
 class ModelManager:
 
     def __init__(self, config_path: str):
-        
+
         self.lock = Lock()
         self.config = json.load(open(config_path))
         self.model: Optional[Model] = None
@@ -135,6 +135,8 @@ class ModelManager:
             seed: int,
             top_p: float,
             top_k: int,
+            stream: bool,
+            *kwargs
     )->Iterable[Response]:
         
         with self.lock:
@@ -146,6 +148,7 @@ class ModelManager:
                 temperature=temperature, 
                 seed=seed, 
                 top_p=top_p, 
-                top_k=top_k
+                top_k=top_k,
+                stream=stream
             )
 
