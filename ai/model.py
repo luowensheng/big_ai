@@ -9,6 +9,7 @@ from .types import ChatCompletion
 from .config import APIConfig
 from .utils import load_module_from_path, str_to_json, render_template
 from typing import TypedDict
+from . import default
 
 class Response(TypedDict):
     text: str
@@ -131,11 +132,11 @@ class ModelManager:
             self,
             model:str,
             messages:list[dict],
-            temperature: float,
-            seed: int,
-            top_p: float,
-            top_k: int,
-            stream: bool,
+            temperature: float= default.TEMPERATURE,
+            seed: int = 1,
+            top_p: float=default.TOP_P,
+            top_k: int=default.TOP_K,
+            stream: bool=True,
             *kwargs
     )->Iterable[Response]:
         
