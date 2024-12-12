@@ -1,0 +1,8 @@
+inputs:
+     prompt: 
+        type: string
+
+template: |
+     {{prompt}}
+
+temperature: 1

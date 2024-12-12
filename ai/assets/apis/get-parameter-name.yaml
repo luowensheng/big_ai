@@ -1,0 +1,13 @@
+temperature: 0
+inputs:
+    description: 
+      type: string
+
+reponse_format: json
+instruction: |
+     Please be very brief and do not provide any additional information. Please use snake case name
+
+template: |
+  Generate a snake_case (ex: email_address) parameter name for the description below in the format: `{"var": <NAME>}`:
+
+  {{description}}

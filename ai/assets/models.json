@@ -1,0 +1,22 @@
+{
+    "models": {
+        "gpt-4o-mini": {
+            "id": "openai",
+            "kwargs": {
+                "model": "gpt-4o-mini"
+            },
+            "env": {
+                "api_key": "OPENAI_API_KEY"
+            }
+        },
+        "gemini-fast": { 
+            "id": "gemini",
+            "kwargs": {
+                "model": "gemini-1.5-pro-flash-latest"
+            },
+            "env": {
+                "api_key": "GEMINI_API_KEY"
+            }
+        }
+    }
+}
