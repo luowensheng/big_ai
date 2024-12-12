@@ -52,7 +52,7 @@ class ModelAdapter:
         messages = []
         instruction and messages.append({"role": "system", "content": instruction, })
 
-        for i, history_message in enumerate(ai_history):
+        for _, history_message in enumerate(ai_history):
 
             if isinstance(history_message["content"], str):
                 messages.append({"role": history_message["role"], "content": history_message["content"]})
@@ -61,13 +61,13 @@ class ModelAdapter:
             assert isinstance(history_message["content"], FileMessage)
             image_path = history_message["content"].file.path
 
-            pprint({"image_path": image_path})
                             
             assert image_path, f"No Path for image: '{image_path}'"
             
             imageb64 = base64.b64encode(open(image_path, 'rb').read()).decode("utf8")
             ext = os.path.splitext(image_path)[-1].lower().strip(".").strip()
             imageb64_url = f'data:image/{ext};base62,{imageb64}'
+            i = len(messages)
 
             if i - 1 >= 0 and messages[i-1]["role"] == "user":
                 last_message = messages[i-1]["content"]

@@ -22,7 +22,7 @@ import os
 class MLXModel:
     def __init__(self, path: str, **kwargs) -> None:
         constants.HF_HUB_CACHE = CACHE_DIR
-        from mlx_lm import load, generate
+        from mlx_lm import load
 
         self.model, self.tokenizer = load(path, **kwargs)
         self.path = path
