@@ -1,0 +1,17 @@
+ADD some new commands like
+set to store/update secrets # ai set OPENAI_KEY sk-rwerqwerqwerqwerqwer
+delete to remove secrets # ai delete OPENAI_KEY
+
+add config params to retrieve secrets
+
+
+target functionalities
+- cli chat
+- cli function use
+- ui // for chat ui and function usage
+- api // for api usage
+- crud model
+- crud tasks
+- add tools support
+- add agent support
+- models save dir

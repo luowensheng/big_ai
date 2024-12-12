@@ -1,7 +1,19 @@
 import json
 import importlib.util
 from jinja2 import  Template
+import platform
 
+def get_os_name():
+    system = platform.system().lower()
+    if "linux" in system:
+        return "linux"
+    elif "darwin" in system:
+        return "mac"
+    elif "windows" in system:
+        return "windows"
+    else:
+        return "other"
+    
 def assert_library_exists(library_name: str, message: str):
     assert importlib.util.find_spec(library_name) is not None, message
 

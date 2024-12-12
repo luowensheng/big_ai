@@ -5,7 +5,7 @@ assert_library_exists("transformers", "Missing 'transformers' library. Install u
 
 import torch
 import gc
-
+from transformers import pipeline, TextStreamer
 
 
 def clear_memory():
@@ -26,13 +26,17 @@ class MLLMModel:
             token=token,
         )
         tie_weights = kwargs.get("tie_weights")
-        if tie_weights  is None or tie_weights:
+        if tie_weights is None or tie_weights:
             self.model.tie_weights()
 
         self.processor = AutoProcessor.from_pretrained(model_id, token=token)
         clear_memory()
 
     def run(self, messages: list[dict], *args, **kwargs):
+        stream = kwargs.get("stream")
+        streamer = None
+        if stream:
+            streamer = TextStreamer(self.model.tokenizer)
 
         try:
 
@@ -48,9 +52,20 @@ class MLLMModel:
                 return_tensors="pt"
             ).to(self.model.device)
 
-            output = self.model.generate(**inputs, max_new_tokens=kwargs.get("max_new_tokens", 200))
-            text = self.processor.decode(output[0])
-            yield {"text": text}
+            outputs = self.model.generate(
+                **inputs, 
+                streamer=streamer, 
+                max_new_tokens=kwargs.get("max_new_tokens", 200)
+            )
+
+            if not stream:
+                text = self.processor.decode(outputs[0])
+                yield {"text": text}
+                return
+
+            for output in outputs:
+                chunk = output["generated_text"]
+                yield {"text": chunk}
 
         finally:
             clear_memory()
@@ -106,3 +121,4 @@ class LLMModel:
 
         finally:
             clear_memory()
+

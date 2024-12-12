@@ -5,7 +5,26 @@ from .mistral import MistralModel
 from .nvidia import NvidiaModel
 from .ollama import OllamaModel
 from .openai import OpenAIModel
-from .hf import MLLMModel, LLMModel
+
+
+def load_hf(*args, **kwargs):
+    from .hf import LLMModel
+    return LLMModel(*args, **kwargs)
+
+
+def load_hfmm(*args, **kwargs):
+    from .hf import MLLMModel
+    return MLLMModel(*args, **kwargs)
+
+def load_mlx(*args, **kwargs):
+    from .mlx_model import MLXModel
+    return MLXModel(*args, **kwargs)
+
+
+def load_llamacpp(*args, **kwargs):
+    from .llama_cpp_model import LLamaCPPModel
+    return LLamaCPPModel(*args, **kwargs)
+
 
 API_MODELS = {
  "claude": ClaudeModel,
@@ -15,6 +34,8 @@ API_MODELS = {
  "nvidia": NvidiaModel,
  "ollama": OllamaModel,
  "openai": OpenAIModel,
- "hf": LLMModel,
- "hf-mm": MLLMModel
+ "llamacpp": load_llamacpp,
+ "mlx": load_mlx,
+ "hf": load_hf,
+ "hf-mm": load_hfmm
 }
