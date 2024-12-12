@@ -24,6 +24,7 @@ def main():
     server_parser = subparsers.add_parser("chat", help='CLI App Manager')
     server_parser.add_argument('--model_id', type=str,  help='Model ID')
     server_parser.add_argument('--instruction', '-i', default="", type=str, help='Instruction')
+    server_parser.add_argument('--config_path', default=default.DEFAULT_MODELS_CONFIG_PATH, help='Name of the application')
 
     server_parser.add_argument('--message', '-m', type=str, default="", help='Message')
 
