@@ -6,7 +6,7 @@ with open("requirements.txt") as f:
 setup(
     name="ai",
     version="0.0.1",
-    packages=["ai"],
+    packages=find_packages(),
     install_requires=requirements,
     description="A Package for Creating AI",
     author="Olivier",
