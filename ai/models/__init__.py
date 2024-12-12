@@ -5,6 +5,7 @@ from .mistral import MistralModel
 from .nvidia import NvidiaModel
 from .ollama import OllamaModel
 from .openai import OpenAIModel
+from .hf import MLLMModel, LLMModel
 
 API_MODELS = {
  "claude": ClaudeModel,
@@ -14,4 +15,6 @@ API_MODELS = {
  "nvidia": NvidiaModel,
  "ollama": OllamaModel,
  "openai": OpenAIModel,
+ "hf": LLMModel,
+ "hf-mm": MLLMModel
 }
