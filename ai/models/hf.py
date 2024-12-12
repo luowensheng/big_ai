@@ -18,17 +18,18 @@ class MLLMModel:
         clear_memory()
 
         model_id = kwargs["model_id"]
+        token=kwargs.get("hf_token")
         self.model = MllamaForConditionalGeneration.from_pretrained(
             model_id,
             torch_dtype=getattr(torch, kwargs.get("torch_dtype", "bfloat16")),
             device_map=kwargs.get("device_map", "auto"),
-            token=kwargs["hf_token"],
+            token=token,
         )
         tie_weights = kwargs.get("tie_weights")
         if tie_weights  is None or tie_weights:
             self.model.tie_weights()
 
-        self.processor = AutoProcessor.from_pretrained(model_id)
+        self.processor = AutoProcessor.from_pretrained(model_id, token=token)
         clear_memory()
 
     def run(self, messages: list[dict], *args, **kwargs):
@@ -60,14 +61,15 @@ class LLMModel:
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         clear_memory()
-
+        token=kwargs.get("hf_token")
         model_id = kwargs["model_id"]
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
             torch_dtype=kwargs.get("torch_dtype", "auto"),
-            device_map=kwargs.get("device_map", "auto")
+            device_map=kwargs.get("device_map", "auto"),
+            token=token
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
 
         clear_memory()
 
