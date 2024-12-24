@@ -57,16 +57,19 @@ class ModelAdapter:
             if isinstance(history_message["content"], str):
                 messages.append({"role": history_message["role"], "content": history_message["content"]})
                 continue
-            
-            assert isinstance(history_message["content"], FileMessage)
-            image_path = history_message["content"].file.path
 
-                            
-            assert image_path, f"No Path for image: '{image_path}'"
+            elif isinstance(history_message["content"], tuple):
+                image_path, item_filename = history_message["content"]
+            else:
+                assert isinstance(history_message["content"], FileMessage), f"{type(history_message['content'])}\n\n {history_message['content']} \n\n"
+                image_path = history_message["content"].file.path
             
+            assert image_path, f"No Path for image: '{image_path}'"
+                
             imageb64 = base64.b64encode(open(image_path, 'rb').read()).decode("utf8")
             ext = os.path.splitext(image_path)[-1].lower().strip(".").strip()
             imageb64_url = f'data:image/{ext};base64,{imageb64}'
+
             i = len(messages)
 
             if i - 1 >= 0 and messages[i-1]["role"] == "user":
