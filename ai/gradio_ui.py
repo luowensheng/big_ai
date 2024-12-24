@@ -162,9 +162,13 @@ def create_interface(config_path: str, host: str, port: int):
                     ai_chatbot = gr.Chatbot(label="Chat", height=CHATBOT_HEIGHT, show_copy_button=True, type="messages") 
                     with gr.Row():
                         with gr.Column(scale=6):
-                            with gr.Row():
-                                ai_textbox = gr.Textbox(interactive=True, label="Message", scale=4)
-                                image_input = gr.Image(scale=1, type="filepath") #type="file", )  # Allows pasting/uploading images
+                            with gr.Group():
+                                with gr.Row(equal_height=True):
+                                    ai_textbox = gr.Textbox(interactive=True, label="Message", scale=4, lines=4)
+                                    with gr.Column(scale=1, min_width=0):
+                                        image_input = gr.Image( min_width=0,type="filepath", height=170) 
+                                        btn = gr.Button("X", min_width=0)
+                                        btn.click(lambda: None, outputs=image_input)
 
                         with gr.Column(scale=1, min_width=5):
                             ai_send_btn = gr.Button("Send")
@@ -212,7 +216,10 @@ def create_interface(config_path: str, host: str, port: int):
 
         # Define the function to run when the button is clicked
         clear_btn.click(lambda : [], outputs=[ai_chatbot])
-        ai_send_btn.click(adapter.send_message, inputs=[model_select, ai_chatbot, ai_textbox, instructions, temperature, seed, top_p, top_k, image_input], outputs=[ai_chatbot, ai_textbox, image_input])
+        ai_send_btn.click(adapter.send_message, inputs=[model_select, ai_chatbot, ai_textbox, instructions, temperature, seed, top_p, top_k, image_input], outputs=[ai_chatbot, ai_textbox, image_input]).then(lambda: "", outputs=ai_textbox)
+        
+        ai_textbox.submit(adapter.send_message, inputs=[model_select, ai_chatbot, ai_textbox, instructions, temperature, seed, top_p, top_k, image_input], outputs=[ai_chatbot, ai_textbox, image_input]).then(lambda: "", outputs=ai_textbox)
+
         retry_btn.click(adapter.resend_message, inputs=[model_select, ai_chatbot, instructions, temperature, seed, top_p, top_k, image_input], outputs=[ai_chatbot, ai_textbox, image_input])
 
 

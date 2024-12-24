@@ -1,6 +1,10 @@
+# https://github.com/google-gemini/cookbook/blob/main/quickstarts/Streaming.ipynb
 import json
 import requests
 import re
+import google.generativeai as genai
+from google.generativeai.types import generation_types
+
 
 
 class GeminiModel:
@@ -8,14 +12,10 @@ class GeminiModel:
         self.model = model
         self.api_key = api_key
 
-    def run(self, messages, temperature,top_p, top_k, stream=True, **kwargs):
 
-        if not stream:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
-        else:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:streamGenerateContent?key={self.api_key}"
+    def run(self, messages: list[dict], temperature: float, top_p: float, top_k: int, stream=True, **kwargs):
 
-        messages_final = []
+        contents = []
         instructions = []
         for message in messages:
 
@@ -34,51 +34,50 @@ class GeminiModel:
                 
                 case "assistant":
                     role = "model"
+            parts = []
 
-            messages_final.append({
-            "role": role,
-                "parts": [
-                    {
-                        "text": message["content"]
-                    }
-                ]   
+            if isinstance(message["content"], str):
+                parts.append({"text": message["content"]})
+            else:
+                for item in message["content"]:
+
+                    if item["type"] == "text":
+                        parts.append({"text": item["text"]})
+
+                    elif item["type"] == "image_url":
+                        base64_image = item["image_url"]["url"]
+                        ext = base64_image.split(";")[0].split("/")[-1].lower()
+
+                        parts.append({
+                            "inline_data":{
+                                "mime_type": f"image/{ext}",
+                                "data": base64_image.split(";base64")[-1]
+                        }})
+                    else:
+                        raise Exception(f"Invalid type: {item['type']}")
+
+            contents.append({
+                "role": role,
+                "parts": parts  
             })
-        request_data = {
-            "contents": messages_final,
-            "generationConfig": {
-                "temperature": temperature,
-                "topP": top_p,
-                "topK": top_k
-            }
-        }
+        instruction = ""
 
         if instructions:
-            request_data["system_instruction"] = {"parts": { "text": "\n".join(instructions)}}
+            instruction = "\n".join(instructions)
 
-        headers = {
-            "Content-Type": "application/json",
-        }
+        genai.configure(api_key=self.api_key)
+        model = genai.GenerativeModel(f"models/{self.model}", system_instruction=instruction or None)
+        response = model.generate_content(contents, stream=stream, generation_config={
+            "temperature": temperature,
+        })
 
-        response = requests.post(url, json=request_data, headers=headers, stream=stream)
-        if response.status_code == 200:
-            try:
-                if not stream:
-                    response_data = response.json()
-                    content = response_data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text") or ""
-                    yield {"text": content}
-                else:
-                    # Handle streaming response
-                    for chunk in response.iter_lines(1024,  delimiter=b'"candidates":'):
-                        if chunk:
-                            text_value = extract_text_value(chunk.decode('utf-8'))
-                            if not text_value:
-                                continue
-                            yield {"text": text_value}
+        if not stream:
+            yield {"text": response.text}
+            return
+        
+        for chunk in response:
+            yield {"text": chunk.text}
 
-            except json.JSONDecodeError:
-                raise Exception("Failed to parse JSON response")
-        else:
-            raise Exception(f"API request failed with status code {response.status_code}: {response.text}")
 
 
 def replace_escaped_chars(input_string):

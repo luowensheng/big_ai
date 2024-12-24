@@ -12,7 +12,7 @@
         "gemini-fast": { 
             "id": "gemini",
             "kwargs": {
-                "model": "gemini-1.5-pro-flash-latest"
+                "model": "gemini-1.5-flash"
             },
             "env": {
                 "api_key": "GEMINI_API_KEY"

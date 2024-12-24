@@ -1,19 +1,16 @@
-from ..utils import assert_library_exists
-
-assert_library_exists("torch", "Missing 'torch' library. To install, please visit to 'https://pytorch.org/get-started/locally/'")
-assert_library_exists("transformers", "Missing 'transformers' library. Install using 'pip install --upgrade transformers'")
-
-import torch
 import gc
-from transformers import pipeline, TextStreamer
+from typing import Optional, Union
 
 
 def clear_memory():
+  import torch
+
   gc.collect()
   torch.cuda.empty_cache()
 
-class MLLMModel:
+class HFMLLMModel:
     def __init__(self, **kwargs):
+        import torch
         from transformers import MllamaForConditionalGeneration, AutoProcessor
         clear_memory()
 
@@ -22,7 +19,7 @@ class MLLMModel:
         self.model = MllamaForConditionalGeneration.from_pretrained(
             model_id,
             torch_dtype=getattr(torch, kwargs.get("torch_dtype", "bfloat16")),
-            device_map=kwargs.get("device_map", "auto"),
+            # device_map=kwargs.get("device_map", "auto"),
             token=token,
         )
         tie_weights = kwargs.get("tie_weights")
@@ -33,6 +30,8 @@ class MLLMModel:
         clear_memory()
 
     def run(self, messages: list[dict], *args, **kwargs):
+        from transformers import pipeline, TextStreamer
+        
         stream = kwargs.get("stream")
         streamer = None
         if stream:
@@ -70,24 +69,25 @@ class MLLMModel:
         finally:
             clear_memory()
 
-
-class LLMModel:
-    def __init__(self, **kwargs):
+class HFLLMModel:
+    def __init__(self, model_id: str, *, hf_token: Optional[str]=None, **kwargs):
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
         clear_memory()
         token=kwargs.get("hf_token")
-        model_id = kwargs["model_id"]
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id,
-            torch_dtype=kwargs.get("torch_dtype", "auto"),
-            device_map=kwargs.get("device_map", "auto"),
+            # torch_dtype=kwargs.get("torch_dtype", "auto"),
+            # device_map=kwargs.get("device_map", "cuda"),
             token=token
-        )
+        ).to("cuda")
+
+
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
 
         clear_memory()
 
+    
     def run(self, messages: list[dict], *args, **kwargs):
 
         try:
@@ -109,7 +109,7 @@ class LLMModel:
 
             generated_ids = self.model.generate(
                 **model_inputs,
-                max_new_tokens=kwargs.get("max_new_tokens", 200)
+                max_new_tokens=kwargs.get("max_new_tokens")
             )
             
             generated_ids = [
@@ -117,8 +117,12 @@ class LLMModel:
             ]
 
             text = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-            yield {"text": text}
+            clear_memory()
+
+            return {"text": text}
+        except:
+            raise
 
         finally:
-            clear_memory()
+             clear_memory()
 

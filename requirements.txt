@@ -2,3 +2,9 @@ requests
 gradio
 fastapi
 uvicorn
+openai
+google-generativeai
+anthropic
+groq
+mistralai
+python-dotenv

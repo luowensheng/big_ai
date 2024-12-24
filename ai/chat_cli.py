@@ -41,7 +41,7 @@ def start_chat(config_path, model_id, instruction, message):
         print(f"\n{model_id}:\t", end="", flush=True)
 
         for response in manager.run(**{"messages": history, "model": model_id, "stream": True}):
-            text = response["text"]
+            text = response["text"] or ""
             reply.append(text)
             print(text, end="", flush=True)
         print("\n")

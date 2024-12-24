@@ -10,6 +10,8 @@ from .config import APIConfig
 from .utils import load_module_from_path, str_to_json, render_template
 from typing import TypedDict
 from . import default
+from dotenv import load_dotenv
+
 
 class Response(TypedDict):
     text: str
@@ -33,7 +35,11 @@ def install_requirements(requirement_path: str):
         
 class ModelManager:
 
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, dotenv_path: str=None):
+
+        load_dotenv(dotenv_path)
+
+        print(locals())
 
         self.lock = Lock()
         self.config = json.load(open(config_path))
@@ -65,10 +71,10 @@ class ModelManager:
         self.current_model_name = name
         
         kwargs = self.config["models"][name].get("kwargs") or {}
-        id = self.config["models"][name].get("id")
-        if id:
-            from .models import API_MODELS
-            load_model = API_MODELS[id]
+        loader = self.config["models"][name].get("loader")
+        if loader:
+            from .model_loader import API_MODELS
+            load_model = API_MODELS[loader]
         
         else:
             filepath = self.config["models"][name]["path"]
@@ -86,7 +92,7 @@ class ModelManager:
 
         model = load_model(**kwargs)
 
-        assert hasattr(model, "run") and inspect.isgeneratorfunction(getattr(model, "run")), f"invalid model. Must contain generator method 'run'"
+        assert hasattr(model, "run") and inspect.isgeneratorfunction(getattr(model, "run")), f"invalid model. Must contain generator method 'run' for {name} {kwargs}"
 
         self.current_model_name = name
         self.model = model
@@ -95,8 +101,6 @@ class ModelManager:
         return self.available_models
     
     def execute_api(self, api: APIConfig, data: dict):
-        from pprint import pprint
-        pprint({"api": api, "data": data})
 
         instruction = api.get("instruction", "")
         messages = []
@@ -140,16 +144,20 @@ class ModelManager:
             *kwargs
     )->Iterable[Response]:
         
-        with self.lock:
+        # with self.lock:
             if self.current_model_name != model or self.model is None:
                 self.load_model(model)
             
-            yield from self.model.run(
+            for text in self.model.run(
                 messages=messages, 
                 temperature=temperature, 
                 seed=seed, 
                 top_p=top_p, 
                 top_k=top_k,
                 stream=stream
-            )
+            ):
+                text: Response
+                if not text.get("text"):
+                    text["text"] = ""
+                yield text
 
