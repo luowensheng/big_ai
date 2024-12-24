@@ -66,7 +66,7 @@ class ModelAdapter:
             
             imageb64 = base64.b64encode(open(image_path, 'rb').read()).decode("utf8")
             ext = os.path.splitext(image_path)[-1].lower().strip(".").strip()
-            imageb64_url = f'data:image/{ext};base62,{imageb64}'
+            imageb64_url = f'data:image/{ext};base64,{imageb64}'
             i = len(messages)
 
             if i - 1 >= 0 and messages[i-1]["role"] == "user":

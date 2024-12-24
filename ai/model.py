@@ -73,7 +73,7 @@ class ModelManager:
         kwargs = self.config["models"][name].get("kwargs") or {}
         loader = self.config["models"][name].get("loader")
         if loader:
-            from .model_loader import API_MODELS
+            from .models import API_MODELS
             load_model = API_MODELS[loader]
         
         else:

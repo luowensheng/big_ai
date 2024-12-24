@@ -51,7 +51,7 @@ class GeminiModel:
                         parts.append({
                             "inline_data":{
                                 "mime_type": f"image/{ext}",
-                                "data": base64_image.split(";base64")[-1]
+                                "data": base64_image.split(",")[-1]
                         }})
                     else:
                         raise Exception(f"Invalid type: {item['type']}")

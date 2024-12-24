@@ -9,10 +9,19 @@
                 "api_key": "OPENAI_API_KEY"
             }
         },
-        "gemini-fast": { 
+        "gemini-1.0-fast": { 
             "id": "gemini",
             "kwargs": {
                 "model": "gemini-1.5-flash"
+            },
+            "env": {
+                "api_key": "GEMINI_API_KEY"
+            }
+        },
+        "gemini-2.0-flash": {
+            "loader": "gemini",
+            "kwargs": {
+                "model": "gemini-2.0-flash-exp"
             },
             "env": {
                 "api_key": "GEMINI_API_KEY"
